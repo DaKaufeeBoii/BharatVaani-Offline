@@ -73,8 +73,8 @@ app/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   cd YOUR_REPO_NAME
+   git clone https://github.com/DaKaufeeBoii/BharatVaani-Offline.git
+   cd BharatVaani-Offline
    ```
 
 2. **Open in Android Studio:**
@@ -204,7 +204,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you have any questions or issues:
 
-1. Check the [Issues](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/issues) page
+1. Check the [Issues](https://github.com/DaKaufeeBoii/BharatVaani-Offline/issues) page
 2. Create a new issue with detailed description
 3. Include device information and steps to reproduce
 
