@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -153,17 +154,22 @@ fun TranslationScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // Logo placeholder (replace with actual drawable when available)
-                        Box(
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                id = if (androidx.compose.foundation.isSystemInDarkTheme()) 
+                                    R.drawable.bharatvaani_logo_dark 
+                                else 
+                                    R.drawable.bharatvaani_logo_light
+                            ),
+                            contentDescription = "Logo",
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(orange),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("B", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        }
+                        )
                         Column {
                             Text(
                                 "BharatVaani",

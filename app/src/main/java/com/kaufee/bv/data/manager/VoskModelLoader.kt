@@ -17,9 +17,9 @@ class VoskModelLoader @Inject constructor(
     private val modelCache = mutableMapOf<String, Model>()
 
     private val assetNames = mapOf(
-        "en" to "vosk/vosk-model-small-en-us-0_15.zip",
-        "hi" to "vosk/vosk-model-small-hi-0_22.zip",
-        "te" to "vosk/vosk-model-small-te-0_42.zip"
+        "en" to "vosk/vosk-model-small-en-us-0.15.zip",
+        "hi" to "vosk/vosk-model-small-hi-0.22.zip",
+        "te" to "vosk/vosk-model-small-te-0.42.zip"
     )
 
     private val fallback = mapOf(

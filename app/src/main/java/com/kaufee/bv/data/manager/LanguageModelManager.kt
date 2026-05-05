@@ -2,9 +2,7 @@ package com.kaufee.bv.data.manager
 
 import android.content.Context
 import android.os.StatFs
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.google.mlkit.nl.translate.Translation
-import com.google.mlkit.nl.translate.TranslatorOptions
+import com.google.mlkit.nl.translate.*
 import com.kaufee.bv.util.TranslationException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -23,13 +21,17 @@ class LanguageModelManager @Inject constructor(
         private const val MINIMUM_FREE_SPACE = 500 * 1024 * 1024L
     }
 
-    private fun getTranslator(languageCode: String) =
-        Translation.getClient(
-            TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(getMlKitLanguageCode(languageCode))
-                .build()
-        )
+    private val translatorCache = mutableMapOf<String, Translator>()
+
+    private fun getTranslator(languageCode: String): Translator =
+        translatorCache.getOrPut(languageCode) {
+            Translation.getClient(
+                TranslatorOptions.Builder()
+                    .setSourceLanguage(TranslateLanguage.ENGLISH)
+                    .setTargetLanguage(getMlKitLanguageCode(languageCode))
+                    .build()
+            )
+        }
 
     fun downloadLanguageModel(languageCode: String): Flow<String> = flow {
         if (!hasEnoughSpace()) throw TranslationException.InsufficientStorageException()
@@ -40,34 +42,33 @@ class LanguageModelManager @Inject constructor(
             getTranslator(languageCode)
                 .downloadModelIfNeeded()
                 .addOnSuccessListener { cont.resume(Unit) }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                     cont.resumeWithException(
-                        TranslationException.ModelDownloadException(languageCode, e.message ?: "Unknown error")
+                        TranslationException.ModelDownloadException(languageCode, it.message ?: "Error")
                     )
                 }
         }
 
-        emit("$languageCode model ready!")
+        emit("$languageCode ready")
     }
 
     suspend fun isModelDownloaded(languageCode: String): Boolean =
         suspendCancellableCoroutine { cont ->
             getTranslator(languageCode)
-                .downloadModelIfNeeded() // no-op if already downloaded
+                .downloadModelIfNeeded()
                 .addOnSuccessListener { cont.resume(true) }
                 .addOnFailureListener { cont.resume(false) }
         }
 
-    private fun getMlKitLanguageCode(languageCode: String): String {
-        return when (languageCode.lowercase()) {
+    private fun getMlKitLanguageCode(code: String): String =
+        when (code.lowercase()) {
             "en" -> TranslateLanguage.ENGLISH
             "hi" -> TranslateLanguage.HINDI
             "te" -> TranslateLanguage.TELUGU
             "ta" -> TranslateLanguage.TAMIL
             "mr" -> TranslateLanguage.MARATHI
-            else -> throw TranslationException.InvalidLanguageException(languageCode)
+            else -> throw TranslationException.InvalidLanguageException(code)
         }
-    }
 
     private fun hasEnoughSpace(): Boolean {
         val stat = StatFs(context.cacheDir.absolutePath)
