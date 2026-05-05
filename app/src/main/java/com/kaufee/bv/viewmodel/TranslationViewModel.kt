@@ -2,6 +2,7 @@ package com.kaufee.bv.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaufee.bv.data.local.entity.HistoryEntity
 import com.kaufee.bv.domain.repository.TranslationRepository
 import com.kaufee.bv.util.TranslationConstants
 import com.kaufee.bv.util.TranslationException
@@ -11,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +25,8 @@ data class TranslationUiState(
     val isTranslating: Boolean = false,
     val error: String? = null,
     val modelsDownloaded: Map<String, Boolean> = emptyMap(),
-    val isOfflineReady: Boolean = false
+    val isOfflineReady: Boolean = false,
+    val history: List<HistoryEntity> = emptyList()
 )
 
 @HiltViewModel
@@ -39,18 +42,43 @@ class TranslationViewModel @Inject constructor(
 
     init {
         checkDownloadedModels()
+        loadHistory()
     }
 
-    private fun checkDownloadedModels() {
+    private fun loadHistory() {
+        viewModelScope.launch {
+            translationRepository.getAllHistory().collect { history ->
+                _uiState.update { it.copy(history = history) }
+            }
+        }
+    }
+
+    fun deleteHistoryItem(id: Long) {
+        viewModelScope.launch {
+            translationRepository.deleteHistory(id)
+        }
+    }
+
+    fun clearAllHistory() {
+        viewModelScope.launch {
+            translationRepository.clearHistory()
+        }
+    }
+
+    fun checkDownloadedModels() {
         viewModelScope.launch {
             val models = mutableMapOf<String, Boolean>()
             TranslationConstants.SUPPORTED_LANGUAGES.forEach { language ->
                 models[language.code] = translationRepository.isModelDownloaded(language.code)
             }
-            val allReady = models.values.all { it }
+            val currentSource = _uiState.value.sourceLanguage
+            val currentTarget = _uiState.value.targetLanguage
+            
+            val isReady = (models[currentSource] ?: false) && (models[currentTarget] ?: false)
+
             _uiState.value = _uiState.value.copy(
                 modelsDownloaded = models,
-                isOfflineReady = allReady
+                isOfflineReady = isReady
             )
         }
     }
@@ -74,6 +102,12 @@ class TranslationViewModel @Inject constructor(
             return
         }
         scheduleTranslation()
+    }
+
+    fun appendSourceText(text: String) {
+        val current = _uiState.value.sourceText
+        val newText = if (current.isBlank()) text else "$current $text"
+        setSourceText(newText)
     }
 
     /** Debounced: only translates 500 ms after the user stops typing */
@@ -113,6 +147,16 @@ class TranslationViewModel @Inject constructor(
                 state.sourceText
             )
             _uiState.value = _uiState.value.copy(translatedText = result, isTranslating = false)
+
+            // Save to history
+            translationRepository.saveToHistory(
+                HistoryEntity(
+                    sourceLanguage = state.sourceLanguage,
+                    targetLanguage = state.targetLanguage,
+                    sourceText = state.sourceText,
+                    translatedText = result
+                )
+            )
         } catch (e: TranslationException.TranslationFailedException) {
             _uiState.value = _uiState.value.copy(
                 isTranslating = false,

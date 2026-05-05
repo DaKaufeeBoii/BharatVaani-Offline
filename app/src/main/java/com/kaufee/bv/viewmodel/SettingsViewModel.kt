@@ -18,6 +18,8 @@ enum class ThemeMode {
 
 data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val speakTranslatedText: Boolean = true,
+    val autoDetectLanguage: Boolean = true,
     val modelStatus: Map<String, Boolean> = emptyMap(),
     val isDownloading: Map<String, Boolean> = emptyMap(),
     val error: String? = null
@@ -37,7 +39,14 @@ class SettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: ThemeMode) {
         _uiState.update { it.copy(themeMode = mode) }
-        // Persistence can be added here if needed
+    }
+
+    fun setSpeakTranslatedText(enabled: Boolean) {
+        _uiState.update { it.copy(speakTranslatedText = enabled) }
+    }
+
+    fun setAutoDetectLanguage(enabled: Boolean) {
+        _uiState.update { it.copy(autoDetectLanguage = enabled) }
     }
 
     fun refreshModelStatus() {

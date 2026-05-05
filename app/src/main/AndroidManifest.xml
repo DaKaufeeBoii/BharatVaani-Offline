@@ -11,9 +11,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/bharatvaani_logo_light"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/bharatvaani_logo_light"
         android:supportsRtl="true"
         android:theme="@style/Theme.BV"
         android:name=".BVApplication">
@@ -22,7 +22,7 @@
         <activity
             android:name=".ui.splash.SplashScreenActivity"
             android:exported="true"
-            android:theme="@style/Theme.BV">
+            android:theme="@style/Theme.BV.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

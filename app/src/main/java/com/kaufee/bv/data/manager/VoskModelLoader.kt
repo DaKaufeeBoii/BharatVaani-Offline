@@ -33,10 +33,12 @@ class VoskModelLoader @Inject constructor(
     }
 
     private fun loadModel(languageCode: String): Model {
-        val asset = assetNames[languageCode]
-            ?: throw IllegalArgumentException("No model for $languageCode")
+        val code = fallback[languageCode] ?: languageCode
 
-        val dir = File(context.filesDir, "vosk/$languageCode")
+        val asset = assetNames[code]
+            ?: throw IllegalArgumentException("No model for $code")
+
+        val dir = File(context.filesDir, "vosk/$code")
 
         if (!dir.exists() || dir.listFiles().isNullOrEmpty()) {
             dir.mkdirs()

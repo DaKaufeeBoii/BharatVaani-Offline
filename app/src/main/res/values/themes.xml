@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base application theme -->
+    <style name="Theme.BV" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
 
-    <style name="Theme.BV" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Splash Screen theme -->
+    <style name="Theme.BV.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/bharatvaani_logo_light</item>
+        <item name="postSplashScreenTheme">@style/Theme.BV</item>
+    </style>
 </resources>

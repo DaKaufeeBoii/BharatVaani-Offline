@@ -33,12 +33,25 @@ class TtsManager @Inject constructor(   // ← FIXED NAME
     fun speak(text: String, languageCode: String) {
         if (!isReady || text.isBlank()) return
         val locale = languageLocaleMap[languageCode] ?: Locale.ENGLISH
-        val result = tts?.setLanguage(locale)
-        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+        val langResult = tts?.setLanguage(locale)
+        if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
             Log.w("TtsManager", "Language $languageCode not supported, falling back to English")
             tts?.setLanguage(Locale.ENGLISH)
         }
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "bv_tts")
+
+        // Handle big input by splitting into chunks
+        val maxSpeechInputLength = TextToSpeech.getMaxSpeechInputLength()
+        if (text.length > maxSpeechInputLength) {
+            val sentences = text.split(Regex("(?<=[.!?])\\s+"))
+            var first = true
+            sentences.forEach { sentence ->
+                val mode = if (first) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+                tts?.speak(sentence, mode, null, "bv_tts_${System.currentTimeMillis()}")
+                first = false
+            }
+        } else {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "bv_tts")
+        }
     }
 
     fun stop() {
